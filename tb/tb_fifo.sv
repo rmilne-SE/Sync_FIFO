@@ -61,6 +61,15 @@ module tb_fifo();
         .empty(empty)
     );
 
+    fifo_assertions assertions (
+        .clk(clk),
+        .rst_n(rst_n),
+        .wr_en(wr_en),
+        .rd_en(rd_en),
+        .full(full),
+        .empty(empty)
+    );
+
     initial begin
         test_reset();
         test_single_rw();
@@ -183,6 +192,7 @@ module tb_fifo();
 
         $display("Passes : %0d", sb.passes);
         $display("Errors : %0d", sb.errors);
+        $display("Assertion Errors : %0d", assertions.get_errors());
     
         if(sb.errors==0)
             $display("RESULT : PASS");
