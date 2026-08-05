@@ -32,8 +32,6 @@ module tb_fifo();
 
     driver drv(
         .clk(clk),
-        .full(full),
-        .empty(empty),
         .rst_n(rst_n),
         .wr_en(wr_en),
         .wr_data(wr_data),
@@ -67,6 +65,17 @@ module tb_fifo();
         .wr_en(wr_en),
         .rd_en(rd_en),
         .full(full),
+        .empty(empty),
+        .wr_ptr(DUT.wr_ptr),
+        .rd_ptr(DUT.rd_ptr)
+    );
+
+    fifo_coverage cov (
+        .clk(clk),
+        .rst_n(rst_n),
+        .wr_en(wr_en),
+        .rd_en(rd_en),
+        .full(full),
         .empty(empty)
     );
 
@@ -79,8 +88,11 @@ module tb_fifo();
         test_wraparound();
         test_sim_rw();
         test_random();
+
         report_results();
-    
+        cov.report();
+        sb.report_final_occupancy();
+
         $finish;
     end
 
@@ -125,7 +137,7 @@ module tb_fifo();
         for(i = 0; i < DEPTH; i = i + 1)
             drv.write(i);
 
-        drv.write(8'hFF); // Shouldn't Be Received on Scoreboard End.
+        drv.write(8'hFF); // FIFO should ignore write because FULL=1
 
         repeat(2) @(posedge clk);
     endtask
@@ -158,7 +170,7 @@ module tb_fifo();
     task test_sim_rw();
         integer i;
 
-        $display("\mRunning Simultaneuous R/W Test");
+        $display("\nRunning Simultaneuous R/W Test");
 
         drv.reset();
 
@@ -188,15 +200,15 @@ module tb_fifo();
     task report_results();
         $display("\n=================================");
         $display("FIFO Verification Complete");
-        $display("=================================");
+        $display("=================================\n");
 
         $display("Passes : %0d", sb.passes);
         $display("Errors : %0d", sb.errors);
         $display("Assertion Errors : %0d", assertions.get_errors());
     
         if(sb.errors==0)
-            $display("RESULT : PASS");
+            $display("RESULT : PASS\n");
         else
-            $display("RESULT : FAIL");
+            $display("RESULT : FAIL\n");
     endtask
 endmodule

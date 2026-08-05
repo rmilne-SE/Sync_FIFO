@@ -15,7 +15,7 @@ module monitor # (
 
     reg rd_pending;
 
-    always @(posedge clk) begin
+    always @(negedge clk) begin
         #1;
         
         rd_pending <= rd_en && !empty;

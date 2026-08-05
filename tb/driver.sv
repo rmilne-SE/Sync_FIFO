@@ -2,9 +2,7 @@ module driver # (
     parameter DATA_WIDTH = 8
 )(
     input clk,
-    input full,
-    input empty,
-
+    
     output reg rst_n,
 
     output reg wr_en,
@@ -18,45 +16,40 @@ module driver # (
         rd_en = 0;
         wr_data = 0;
 
-        repeat(2)
-            @(posedge clk);
+        repeat(2) @(posedge clk);
 
         rst_n = 1;
     endtask
 
     task write([DATA_WIDTH-1:0] data);
-        @(posedge clk);
+        @(negedge clk);
 
-        if(!full) begin
-            wr_en = 1;
-            wr_data = data;
-        end
+        wr_en = 1;
+        wr_data = data;
 
-        @(posedge clk);
+        @(negedge clk);
+
         wr_en = 0;
     endtask
 
     task read();
-        @(posedge clk)
+        @(negedge clk)
 
-        if(!empty)
-            rd_en = 1;
+        rd_en = 1;
 
-        @(posedge clk)
-            rd_en = 0;
+        @(negedge clk)
+
+        rd_en = 0;
     endtask
 
     task read_write([DATA_WIDTH-1:0] data);
-        @(posedge clk);
-        if(!full) begin
-            wr_en = 1;
-            wr_data = data;
-        end
+        @(negedge clk);
+        wr_en = 1;
+        wr_data = data;
 
-        if(!empty)
-            rd_en = 1;
+        rd_en = 1;
 
-        @(posedge clk);
+        @(negedge clk);
 
         wr_en = 0;
         rd_en = 0;
