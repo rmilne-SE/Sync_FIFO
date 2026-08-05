@@ -2,6 +2,7 @@ module scoreboard # (
     parameter DATA_WIDTH = 8
 )(
     input clk,
+    input rst_n,
 
     input wr_en,
     input [DATA_WIDTH-1:0] wr_data,
@@ -18,10 +19,15 @@ module scoreboard # (
 
     reg [DATA_WIDTH-1:0] expected;
 
+    integer passes = 0;
     integer errors = 0;
 
     always @(posedge clk) begin
         #1;
+        if(!rst_n) begin
+            queue.delete();
+            pending_read = 0;
+        end 
 
         if(wr_en && !full)
             queue.push_back(wr_data);
@@ -35,6 +41,7 @@ module scoreboard # (
                 errors = errors + 1;
             end else 
                 $display("FIFO PASS Expected=%0d", expected);
+                passes = passes + 1;
         end
 
         pending_read <= rd_en && !empty;

@@ -46,4 +46,20 @@ module driver # (
             rd_en = 0;
     endtask
 
+    task read_write([DATA_WIDTH-1:0] data);
+        @(posedge clk);
+        if(!full) begin
+            wr_en = 1;
+            wr_data = data;
+        end
+
+        if(!empty)
+            rd_en = 1;
+
+        @(posedge clk);
+
+        wr_en = 0;
+        rd_en = 0;
+    endtask
+
 endmodule
