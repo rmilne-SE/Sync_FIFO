@@ -1,80 +1,25 @@
-module tb_fifo # (
-    parameter DATA_WIDTH = 8,
-    parameter DEPTH      = 16
-)();
+module tb_fifo();
+    parameter DATA_WIDTH = 8;
+    parameter DEPTH = 16;
+
     reg clk;
-    reg rst_n;
+    wire rst_n;
 
-    reg wr_en;
-    reg [DATA_WIDTH-1:0] wr_data;
-    wire full;
+    wire wr_en;
+    wire [DATA_WIDTH-1:0] wr_data;
 
-    reg rd_en;
+    wire rd_en;
     wire [DATA_WIDTH-1:0] rd_data;
+
+    wire full;
     wire empty;
 
-    initial begin 
+    initial begin
         clk = 0;
         forever #5 clk = ~clk;
     end
 
-    initial begin
-        // Initialise and Test Reset
-        rst_n = 0;
-        wr_en = 0;
-        rd_en = 0;
-
-        wr_data = 0;
-
-        #10;
-        rst_n = 1;
-        #5;
-
-        // Test Single Write + Read Out
-        wr_en = 1;
-        wr_data = 5;
-
-        #5;
-        wr_en = 0;
-        // Enable Read
-        #5;
-        rd_en = 1;
-        #10;
-
-        // Disable Read and Fill to Full
-        rd_en = 0;
-        wr_en = 1;
-        wr_data = 5;
-        #160;
-
-        // Disable Write and Empty
-        wr_en = 0;
-        rd_en = 1;
-        #150;
-
-        // Test wr_ptr wraparound
-        #5;
-        rd_en = 0;
-        wr_en = 1;
-        #150;
-
-        // Test wr_ptr wraparound
-        #5;
-        wr_en = 0;
-        rd_en = 1;
-        #140;
-
-        #5;
-        wr_en = 1;
-        wr_data = 7;
-        #20;
-
-        
-        #5;
-        $finish;
-    end
-
-    fifo_sync uut (
+    fifo_sync DUT(
         .CLK(clk),
         .RST_N(rst_n),
         .WR_EN(wr_en),
@@ -84,10 +29,50 @@ module tb_fifo # (
         .RD_DATA(rd_data),
         .EMPTY(empty)
     );
-    
-    initial begin
-        $dumpfile("dump.vcd");
-        $dumpvars(0, tb_fifo);
-    end
 
+    driver drv(
+        .clk(clk),
+        .full(full),
+        .empty(empty),
+        .rst_n(rst_n),
+        .wr_en(wr_en),
+        .wr_data(wr_data),
+        .rd_en(rd_en)
+    );
+
+    monitor mon(
+        .clk(clk),
+        .wr_en(wr_en),
+        .wr_data(wr_data),
+        .rd_en(rd_en),
+        .rd_data(rd_data),
+        .full(full),
+        .empty(empty)
+    );
+
+    scoreboard sb(
+        .clk(clk),
+        .wr_en(wr_en),
+        .wr_data(wr_data),
+        .rd_en(rd_en),
+        .rd_data(rd_data),
+        .full(full),
+        .empty(empty)
+    );
+
+    initial begin
+        drv.reset();
+
+        drv.write(10);
+        drv.write(20);
+        drv.write(30);
+
+        drv.read();
+        drv.read();
+        drv.read();
+
+        #100;
+
+        $finish;
+    end
 endmodule
