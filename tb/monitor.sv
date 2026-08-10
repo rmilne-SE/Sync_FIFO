@@ -1,3 +1,9 @@
+// Testbench Monitor Module
+// Passive component observes DUT/driver signals and logs write/read transactions
+// to the console. Does not drive any signals and has no bearing on pass/fail.
+//
+// rd_pending is necessary as the RD_DATA is registered in DUT, data associated with a given
+// rd_en pulse appears one cycle later. Sampling the rd_en directly would print wrong value
 module monitor # (
     parameter DATA_WIDTH = 8
 )(
@@ -15,6 +21,8 @@ module monitor # (
 
     reg rd_pending;
 
+    // Sample after negative clock edge
+    // #1; avoids race conditions with signals updated on negedge elsewhere
     always @(negedge clk) begin
         #1;
         
