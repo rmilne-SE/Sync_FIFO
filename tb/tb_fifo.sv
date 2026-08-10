@@ -1,3 +1,9 @@
+// Testbench Top Module
+// Instantiates the DUT, driver, monitor, scoreboard, assertions, and coverage.
+// Runs a fixed sequence of directed tests followed by a large random test.
+//
+// Reports scoreboard results, asseertion error count, coverage and final occupancy
+// at the end
 module tb_fifo();
     parameter DATA_WIDTH = 8;
     parameter DEPTH = 16;
@@ -66,7 +72,7 @@ module tb_fifo();
         .rd_en(rd_en),
         .full(full),
         .empty(empty),
-        .wr_ptr(DUT.wr_ptr),
+        .wr_ptr(DUT.wr_ptr), // Uses hierarchical reference to tap ptrs
         .rd_ptr(DUT.rd_ptr)
     );
 
@@ -79,6 +85,7 @@ module tb_fifo();
         .empty(empty)
     );
 
+    // Directed test sequence followed by large randomised test
     initial begin
         test_reset();
         test_single_rw();
@@ -96,12 +103,16 @@ module tb_fifo();
         $finish;
     end
 
+    // Directed Tests
+    
+    // Basic reset test
     task test_reset();
         $display("\nRunning Reset Test");
         drv.reset();
         repeat(2) @(posedge clk);
     endtask
 
+   // One write followed by one read
     task test_single_rw();
         $display("\nRunning Single Read/Write Test");
         drv.write(10);
@@ -109,6 +120,7 @@ module tb_fifo();
         repeat(2) @(posedge clk);
     endtask
 
+    // Fills FIFO checks FULL, empties FIFO checks EMPTY
     task test_fill_empty();
         integer i;
         $display("\nRunning Fill/Empty Test");
@@ -127,6 +139,8 @@ module tb_fifo();
             $error("FIFO should be EMPTY!");
     endtask
 
+    // Fills FIFO, attempts additional write, DUT should ignore
+    // (assertions verifies this)
     task test_overflow();
         integer i;
 
@@ -142,6 +156,8 @@ module tb_fifo();
         repeat(2) @(posedge clk);
     endtask
 
+    // Attempt read on empty FIFO, DUT should ignore
+    // (assertions verifies this)
     task test_underflow();
         $display("\nRunning Underflow Test");
         drv.reset();
@@ -149,6 +165,8 @@ module tb_fifo();
         repeat(2) @(posedge clk);
     endtask
 
+    // Fill. drain half, refill half, drain fully
+    // tests ptr wraparound through memory array
     task test_wraparound();
         integer i;
         $display("\nRunning Wraparound Test");
@@ -167,6 +185,7 @@ module tb_fifo();
         repeat(2) @(posedge clk);
     endtask
 
+    // Half fill then perform simultaneous Read and Writes
     task test_sim_rw();
         integer i;
 
@@ -181,6 +200,8 @@ module tb_fifo();
             drv.read_write(i + 50);
     endtask
 
+    // 10,000 iteration randomised test
+    // Mixes writes, reads, and simultaneous read/write
     task test_random();
         integer i;
 
@@ -197,6 +218,7 @@ module tb_fifo();
         end
     endtask
 
+    // Final Report
     task report_results();
         $display("\n=================================");
         $display("FIFO Verification Complete");
