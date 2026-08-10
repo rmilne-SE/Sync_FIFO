@@ -1,3 +1,10 @@
+// Testbench Scoreboard Module
+// Reference Module and Checker. Maintains its own version of the queue and compares it against 
+// what the DUT actually outputs on RD_DATA flagging any mismatches. This module determines PASS/FAIL,
+// independent of assertions.
+//
+// Same one cycle pending pattern used in monitor. RD_DATA is registered in DUT, so expected value is only
+// compared one cycle after read was issued.
 module scoreboard # (
     parameter DATA_WIDTH = 8
 )(
@@ -13,7 +20,7 @@ module scoreboard # (
     input full,
     input empty
 );
-    reg [DATA_WIDTH-1:0] queue[$];
+    reg [DATA_WIDTH-1:0] queue[$]; // Scoreboards version of FIFO contents
 
     reg pending_read;
 
@@ -28,11 +35,13 @@ module scoreboard # (
             queue.delete();
             pending_read = 0;
         end else begin
+            // Mirror any accepted write into scoreboard queue
             if(wr_en && !full)
                 queue.push_back(wr_data);
 
+            // Check previous cycle read issue against oldest entry in queue
             if(pending_read) begin
-                expected = queue.pop_front();
+            expected = queue.pop_front();
 
                 if(rd_data != expected)
                 begin
@@ -48,6 +57,7 @@ module scoreboard # (
         pending_read <= rd_en && !empty;
     end
 
+    // Used once at end of TB to report any data left unread in FIFO
     task report_final_occupancy();
         $display("Final FIFO Occupancy : %0d\n", queue.size());
     endtask
