@@ -1,6 +1,0 @@
-# OS junk
-.DS_Store
-
-# Simulation artifacts (Icarus Verilog)
-*.vvp
-*.vcd
