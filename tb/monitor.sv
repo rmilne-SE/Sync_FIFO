@@ -3,7 +3,7 @@
 // to the console. Does not drive any signals and has no bearing on pass/fail.
 //
 // rd_pending is necessary as the RD_DATA is registered in DUT, data associated with a given
-// rd_en pulse appears one cycle later. Sampling the rd_en directly would print wrong value
+// rd_en pulse appears one cycle later. Sampling rd_en directly would print wrong value
 module monitor # (
     parameter DATA_WIDTH = 8
 )(
