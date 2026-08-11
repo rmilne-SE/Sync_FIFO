@@ -31,6 +31,8 @@ test, and then prints scoreboard results, assertion error count, coverage report
 final occupancy.
 
 ## Results
+
+```
 =================================
 FIFO Verification Complete
 =================================
@@ -73,3 +75,4 @@ Total Writes (Lifetime)            : 6519
 Total Reads (Lifetime)             : 6488
 
 Final FIFO Occupancy : 6
+```
