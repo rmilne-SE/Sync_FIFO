@@ -226,9 +226,9 @@ module tb_fifo();
 
         $display("Passes : %0d", sb.passes);
         $display("Errors : %0d", sb.errors);
-        $display("Assertion Errors : %0d", assertions.get_errors());
+        $display("Assertion Errors : %0d", assertions.assertion_errors);
     
-        if(sb.errors==0)
+        if((sb.errors==0) && (assertions.assertion_errors == 0))
             $display("RESULT : PASS\n");
         else
             $display("RESULT : FAIL\n");

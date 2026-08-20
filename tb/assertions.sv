@@ -90,8 +90,4 @@ module fifo_assertions # (
         end
 
     end
-
-    function get_errors();
-        return assertion_errors;
-    endfunction
 endmodule
